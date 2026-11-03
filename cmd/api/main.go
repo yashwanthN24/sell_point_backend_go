@@ -9,6 +9,7 @@ import (
 	// dotenv "github.com/joho/godotenv" // normal available as godotenv but now we can name as them dotenv so now all avilable via dotenv
 
 	"github.com/YashwanthN24/sell_point/internal/config"
+	"github.com/YashwanthN24/sell_point/internal/handlers"
 )
 
 func main() {
@@ -18,16 +19,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
-		// but we want json apis right
-		w.Header().Set("Content-Type", "application/json")
-
-		// w.Write([]byte("all ok")) // by default we are sending text/plain content-type
-
-		w.WriteHeader(http.StatusOK) // this line should comes after all Header set because it sends the header already to the respjnse
-
-		w.Write([]byte(`{"status" : "okay"}`))
-	})
+	mux.HandleFunc("GET /healthz", handlers.Health)
 
 	// creating a server with configuration
 	srv := &http.Server{
