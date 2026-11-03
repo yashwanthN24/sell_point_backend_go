@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	_ "net/http/pprof" // this will juts call that package init functions and doesn't give access to objectto acess in this file
 	"time"
 )
 
