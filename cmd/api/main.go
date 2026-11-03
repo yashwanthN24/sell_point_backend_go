@@ -5,10 +5,16 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	// dotenv "github.com/joho/godotenv" // normal available as godotenv but now we can name as them dotenv so now all avilable via dotenv
+
+	"github.com/YashwanthN24/sell_point/internal/config"
 )
 
 func main() {
-	fmt.Println("olx_api running...")
+
+	cfg := config.MustLoad()
+	fmt.Println("starting olx server...")
 
 	mux := http.NewServeMux()
 
@@ -24,14 +30,15 @@ func main() {
 	})
 
 	// creating a server with configuration
-	srv := http.Server{
-		Addr:         ":8090",
+	srv := &http.Server{
+		Addr:         ":" + cfg.Port,
 		Handler:      mux,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 30,
 		IdleTimeout:  time.Second * 60,
 	}
 
+	log.Printf("server is listening on %s", srv.Addr)
 	if err := srv.ListenAndServe(); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
