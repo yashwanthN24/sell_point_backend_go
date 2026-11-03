@@ -26,7 +26,7 @@ func main() {
 
 		w.WriteHeader(http.StatusOK) // this line should comes after all Header set because it sends the header already to the respjnse
 
-		w.Write([]byte(`{"status" : "ok"}`))
+		w.Write([]byte(`{"status" : "okay"}`))
 	})
 
 	// creating a server with configuration
