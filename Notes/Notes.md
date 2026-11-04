@@ -118,3 +118,7 @@ func main() {
 ```
 
 
+Still one program m.Down() will undo all migrations up to the first migration so everything is gone 
+
+In production we wont want this behviour we would only want to rollback to last migration so we can use m.Steps(-1) to rollback only one migration at a time
+

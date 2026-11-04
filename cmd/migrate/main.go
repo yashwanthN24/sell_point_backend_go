@@ -35,7 +35,7 @@ func main() {
 		}
 	case "down":
 		log.Println("down called")
-		if err := m.Down(); err != nil {
+		if err := m.Steps(-1); err != nil { // downgrade by 1 migrations version not entire whole migration till the start which can be dangerous as it removes everyy m,igration from the start of application
 			log.Fatal(err)
 		}
 	default:
