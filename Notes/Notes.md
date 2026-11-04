@@ -75,3 +75,46 @@ https://github.com/jackc/pgx (This we use when we want to use pgx directly witho
 because we are using pgx as a driver for the existig database/url interface so that in future if we want to change the database we can do it easily without changing the code in db.go file
 
 we just need to change the driver in future code remains same
+
+## Migrations to create tables update schema of table upghrade and dowgrade
+
+we create a separate entry point so running that binary runs the migrations base on whether you call it with `up` or `down` passed as command line arguments
+
+we use `golang-migrate` package for this purpose without using any existsing driver
+
+https://github.com/golang-migrate/migrate#use-in-your-go-project
+
+"github.com/golang-migrate/migrate/v4"
+_ "github.com/golang-migrate/migrate/v4/database/postgres"
+_ "github.com/golang-migrate/migrate/v4/source/file"
+
+https://github.com/golang-migrate/migrate/blob/master/database/postgres/TUTORIAL.md#optional-run-migrations-within-your-go-app
+
+```go
+
+import (
+	"log"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+)
+
+func main() {
+	m, err := migrate.New(
+		"file://db/migrations", // pa5th to your migrations folder
+		"postgres://postgres:postgres@localhost:5432/example?sslmode=disable" // Databaseconnection string or via env or os.getEnv)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := m.Up(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+//make migrate-up  (To upgrade the migrate )
+// make migrate-down (To downgrade or undo the current version of migration )
+
+```
+
+
