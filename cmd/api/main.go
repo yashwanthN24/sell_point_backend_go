@@ -29,8 +29,13 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	// refactor handlers depednednyc injection via constructor pattern using a common struct that includes all the dependency  of that handler
+	lh := handlers.NewListingHandler(db)
+
 	mux.HandleFunc("GET /healthz", handlers.Health)
-	mux.HandleFunc("GET /listings", handlers.List(db)) // handlers.List() is dependency injection via closure factory (we are passing db as dependency to that handler)
+	mux.HandleFunc("GET /listings", lh.List)
+
+	mux.HandleFunc("DELETE /listings/{id}", lh.Delete)
 
 	// creating a server with configuration
 	srv := &http.Server{

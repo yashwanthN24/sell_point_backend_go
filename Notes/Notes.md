@@ -142,3 +142,10 @@ A production-ready handler needs to manage the full flow:
 query → iterate → scan → handle errors 
 → release resources → encode → return JSON. 
 
+## Deleting Records & Managing Dependencies
+Build the delete listing endpoint and learn how to safely remove a record from the database using a dynamic route parameter and a parameterized SQL query. Then refactor the handlers using Go’s constructor pattern so that dependencies, such as the database, can be injected once and shared across multiple handlers without repeatedly passing them around. 
+
+to get path variables use r.PathValue("pathname")
+
+Ex: r.PathValue("id") (to get the id from the path variable)
+
