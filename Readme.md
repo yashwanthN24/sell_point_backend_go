@@ -37,8 +37,8 @@ make run (runs even build because of run: build line in Makefile that tells make
 
 make build
 
-Right now it compile all go files at the root file including the main.go fiel to one binary 
+Right now it compiles all go files at the root file including the main.go fiel to one binary 
 
 but if we have multiple entry points for our app say ws , cli or worker 
 
-then we have to create cmd folder and create indicual foldersfor each entry point and have its own main.go file for each folder
+then we have to create cmd folder and create indicual foldersfor each entry point and have its own main.go file having main function for each folder
