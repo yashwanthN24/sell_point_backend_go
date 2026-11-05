@@ -16,15 +16,13 @@ import (
 func main() {
 
 	cfg := config.MustLoad()
-	_, err := db.Connect(cfg.DatabaseUrl)
+	db, err := db.Connect(cfg.DatabaseUrl)
 
-	// using this db variable we can run queries 
+	// using this db variable we can run queries
 
 	if err != nil {
 		log.Fatalf("main.db.connect : %v", err)
 	}
-
-
 
 	fmt.Println("database connected")
 	fmt.Println("starting olx server...")
@@ -32,6 +30,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /healthz", handlers.Health)
+	mux.HandleFunc("GET /listings", handlers.List(db)) // handlers.List() is dependency injection via closure factory (we are passing db as dependency to that handler)
 
 	// creating a server with configuration
 	srv := &http.Server{

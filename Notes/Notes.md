@@ -122,3 +122,23 @@ Still one program m.Down() will undo all migrations up to the first migration so
 
 In production we wont want this behviour we would only want to rollback to last migration so we can use m.Steps(-1) to rollback only one migration at a time
 
+![alt text](image-15.png)
+
+on calling rows.next() it will return true if there is a next row to read and moves to the next row and false if there is no more rows to read
+
+![alt text](image-16.png)
+
+so by calling next on a row we iterate through each row of the query result set and read the data from each row one at a time
+
+
+## Fetching Database Records & Returning the JSON
+
+Build the listings API endpoint from the previous episode into a fully working, database-backed endpoint. You’ll learn how to query, iterate through query results, scan rows into Go structs, handle database errors safely, and return the final data as properly formatted JSON to the client.
+
+
+Fetching database data isn't just about running a query. 
+A production-ready handler needs to manage the full flow: 
+
+query → iterate → scan → handle errors 
+→ release resources → encode → return JSON. 
+
