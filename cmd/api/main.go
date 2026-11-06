@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	// dotenv "github.com/joho/godotenv" // normal available as godotenv but now we can name as them dotenv so now all avilable via dotenv
@@ -24,6 +26,12 @@ func main() {
 		log.Fatalf("main.db.connect : %v", err)
 	}
 
+	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true , // log even the file and speific exact line where this log is from 
+		Level: slog.LevelInfo, // set global handler so global olog levell is Info (so info , warn and debug logs are logged rest al ignore i.e debug logs avoided )
+	})
+	logger := slog.New(handler)
+	slog.SetDefault(logger) // first this sets slog default handler as JsonLogger and this make sure that default log even log will be redirected to slog json style logger 
 	fmt.Println("database connected")
 	fmt.Println("starting olx server...")
 

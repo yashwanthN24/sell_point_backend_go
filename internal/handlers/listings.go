@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -90,7 +91,10 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 		`DELETE FROM listings WHERE id = $1`, id)
 
 	if err != nil {
-		log.Printf("delete : %v", err)
+		// log.Printf("delete : %v", err)
+
+		// using global logger setup across app bad practice always we must be clear in which hander needs what dependency like how we do for db  so thats //TODO
+		slog.Error("delete failed", "listing_id", id, "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError) // return 500 internal server error as response
 		return
 	}

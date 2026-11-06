@@ -158,4 +158,36 @@ say db query takes 10s and client disconnects after 5s then the query will still
 
 So we have to signal the query to stop executing when the client disconnects so we can use context for that
 
+## Structured Logging 
+
+Structured Logging in Go
+Learn how to replace basic text-based logging with structured JSON logging for production Go applications. You’ll use Go’s built-in  log/slog  package, configure a JSON handler, add useful fields such as listing IDs and errors, enable source information, and understand how logging levels control which records are written.
+What You’ll Learn
+Understand why structured logging matters in production. 
+
+Use Go’s built-in  log/slog  package for structured JSON logging. 
+
+Configure JSON handlers and add useful log attributes. 
+
+Understand  slog  logging levels: Debug, Info, Warn, and Error. 
+
+Configure source information and the default logger. 
+
+Know when to use different logging levels in production.
+
+
+
 ![alt text](image-18.png)
+
+
+![alt text](image-19.png)
+
+prints current log level and all other level above it (if we set logginglevel to info then info and all levels above it get printed but debug is ignored even if present in codebase)
+
+![alt text](image-20.png)
+
+![alt text](image-21.png)
+
+loglevel if set to debug then all log messages will be printed, including debug messages. 
+
+This level system works the same across all backends (numbers might change but he same idea)
