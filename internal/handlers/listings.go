@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -35,8 +34,8 @@ func NewListingHandler(db *sql.DB) *ListingHander {
 
 // This pattern is called closure factory as inner func forms a closure with outer func
 func (lh ListingHander) List(w http.ResponseWriter, r *http.Request) {
-
-	rows, err := lh.db.Query(`
+	ctx := r.Context()
+	rows, err := lh.db.QueryContext(ctx, `
 			SELECT id , title , description , price , created_at  
 			FROM listings 
 			ORDER BY created_at DESC 
@@ -79,13 +78,15 @@ func (lh ListingHander) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
+	// request bound context always pass this forthrid part api and db calls as they avoid zombie queries i.e when client exits befoire the db finshes
+	ctx := r.Context()
 	id := r.PathValue("id")
-	fmt.Println("id", id)
+	log.Println("id", id)
 
 	// db.Query() is only queries like select
 
 	// for delete queries we use db.Exec()
-	_, err := lh.db.Exec(
+	_, err := lh.db.ExecContext(ctx,
 		`DELETE FROM listings WHERE id = $1`, id)
 
 	if err != nil {

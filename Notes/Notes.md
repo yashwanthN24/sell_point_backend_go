@@ -149,3 +149,13 @@ to get path variables use r.PathValue("pathname")
 
 Ex: r.PathValue("id") (to get the id from the path variable)
 
+
+## use context to prevent zombie queries 
+
+![alt text](image-17.png)
+
+say db query takes 10s and client disconnects after 5s then the query will still run for 10s and will be a zombie query which is not good for performance
+
+So we have to signal the query to stop executing when the client disconnects so we can use context for that
+
+![alt text](image-18.png)
