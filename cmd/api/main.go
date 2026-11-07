@@ -46,6 +46,8 @@ func main() {
 
 	mux.HandleFunc("DELETE /listings/{id}", lh.Delete)
 
+	mux.HandleFunc("POST /listings", lh.Create)
+
 	// so all routes go through this middleware before going to the actual route handler
 	handler := middlewares.RequestId(mux)
 	// creating a server with configuration

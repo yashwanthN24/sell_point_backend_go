@@ -19,7 +19,7 @@ type listing struct {
 	ID          string    `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	Price       string    `json:"price"`
+	Price       int64     `json:"price"`
 	City        string    `json:"city"`
 	CreatedAt   time.Time `json:"created_at"`
 }
@@ -118,3 +118,50 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (lh ListingHander) Create(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := middlewares.RequestIDFromContext(ctx)
+
+	var req listing
+	// Decoder to convert json to struct (desrializsation)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		lh.logger.Error("failed to decode", "requestId", requestId, "err", err)
+		httpx.Error(w, http.StatusBadRequest, "invalid_body", httpx.CodeMalformedJSON)
+		return
+	}
+
+	// fmt.Println(req)
+	// log.Println(req)
+
+	row := lh.db.QueryRowContext(ctx, `
+		INSERT INTO listings (title , description , price , city) 
+		VALUES ($1 , $2 , $3 , $4) RETURNING id`, req.Title, req.Description, req.Price, req.City)
+
+	var id string
+
+	// to return all field modify to RETURNING * for all fields and take a varibale of type liting struct and pass their pointers to Scan
+	if err := row.Scan(&id); err != nil {
+		lh.logger.Error("failed to insert", "requestId", requestId, "err", err)
+		httpx.Error(w, http.StatusInternalServerError, "something went wrong", httpx.CodeInternalError)
+		return
+	}
+
+	lh.logger.Info("listing created", "request_id", requestId, "listing_id", id)
+
+	// w.Write([]byte("created"))
+
+	// response := struct {
+	// 	Message string `json:"msg"`
+	// }{Message: "Hello world"}
+	// w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(response)
+	//  in go lang we dont have object so to send json we have to use structs as they get converted to json
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+
+	_ = json.NewEncoder(w).Encode(map[string]string{"id": id})
+}
+
+// https://chatgpt.com/c/6aef09fd-3a54-83ec-9112-5de682109dd4
