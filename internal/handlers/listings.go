@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/YashwanthN24/sell_point/internal/httpx"
 	"github.com/YashwanthN24/sell_point/internal/middlewares"
 )
 
@@ -106,7 +107,8 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 		// log.Printf("delete : %v", err)
 
 		lh.logger.Error("delete failed", "listing_id", id, "requestId", requestId, "err", err)
-		http.Error(w, "internal error", http.StatusInternalServerError) // return 500 internal server error as response
+		httpx.Error(w, http.StatusInternalServerError, "something went wrong", "internal_error")
+		// http.Error(w, "internal error", http.StatusInternalServerError) // return 500 internal server error as response
 		return
 	}
 
