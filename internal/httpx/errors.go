@@ -19,7 +19,7 @@ const (
 	CodeRateLimited      Code = "rate_limited"
 )
 
-// we are using code as string because 400 status code alone canave multiple reason so we want to be more specific with respect to errors what they are 
+// we are using code as string because 400 status code alone canave multiple reason so we want to be more specific with respect to errors what they are
 
 type errorEnvelope struct {
 	Error errorPayload `json:"error"`
@@ -28,6 +28,7 @@ type errorEnvelope struct {
 type errorPayload struct {
 	Code    Code   `json:"code"`
 	Message string `json:"message"`
+	Field   string `json:"field,omitempty"` // if this field is empty it wont be included in the json 
 }
 
 func Error(w http.ResponseWriter, status int, message string, code Code) {
@@ -38,6 +39,19 @@ func Error(w http.ResponseWriter, status int, message string, code Code) {
 		Error: errorPayload{
 			Message: message,
 			Code:    code,
+		},
+	})
+}
+
+func ValidationError(w http.ResponseWriter, status int, message string, code Code, field string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	_ = json.NewEncoder(w).Encode(errorEnvelope{
+		Error: errorPayload{
+			Message: message,
+			Code:    code,
+			Field:   field,
 		},
 	})
 }

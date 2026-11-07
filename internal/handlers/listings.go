@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"log"
 	"log/slog"
 	"net/http"
@@ -136,6 +137,14 @@ func (lh ListingHander) Create(w http.ResponseWriter, r *http.Request) {
 
 	// fmt.Println(req)
 	log.Println(req)
+
+	if err := req.Validate(); err != nil {
+		var verr *dtos.ValidationError
+		errors.As(err, &verr)
+		lh.logger.Error("validation failed", "requestId", requestId, "err", err)
+		httpx.ValidationError(w, http.StatusUnprocessableEntity, err.Error(), httpx.CodeValidationFailed, verr.Field)
+		return
+	}
 
 	row := lh.db.QueryRowContext(ctx, `
 		INSERT INTO listings (title , description , price , city) 
