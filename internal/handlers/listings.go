@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/YashwanthN24/sell_point/internal/middlewares"
 )
 
 // add struct tags so we define how the fields are named when serialized to json using json.NewEncoder
@@ -38,6 +40,8 @@ func NewListingHandler(db *sql.DB, logger *slog.Logger) *ListingHander {
 // This pattern is called closure factory as inner func forms a closure with outer func
 func (lh ListingHander) List(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	requestId := middlewares.RequestIDFromContext(ctx)
+	// requestId := ctx.Value("requestCtxId").(string)
 	rows, err := lh.db.QueryContext(ctx, `
 			SELECT id , title , description , price , created_at  
 			FROM listings 
@@ -46,7 +50,7 @@ func (lh ListingHander) List(w http.ResponseWriter, r *http.Request) {
 		`)
 
 	if err != nil {
-		lh.logger.Error("listings query error", "err", err)
+		lh.logger.Error("listings query error", "requestId", requestId, "err", err)
 		// log.Printf("query: %v", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
@@ -59,13 +63,13 @@ func (lh ListingHander) List(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var l listing
 		if err := rows.Scan(&l.ID, &l.Title, &l.Description, &l.Price, &l.CreatedAt); err != nil {
-				lh.logger.Error("rows scan error", "err", err)
+			lh.logger.Error("rows scan error", "requestId", requestId, "err", err)
 			// log.Printf("rows.scan : %v", err)
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 
-		lh.logger.Info("listings fetched" , "total" , len(listings))
+		lh.logger.Info("listings fetched", "total", len(listings), "requestId", requestId)
 
 		listings = append(listings, l)
 	}
@@ -87,6 +91,8 @@ func (lh ListingHander) List(w http.ResponseWriter, r *http.Request) {
 func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 	// request bound context always pass this forthrid part api and db calls as they avoid zombie queries i.e when client exits befoire the db finshes
 	ctx := r.Context()
+	requestId := middlewares.RequestIDFromContext(ctx)
+	// requestid := ctx.Value("requestCtxId").(string)
 	id := r.PathValue("id")
 	log.Println("id", id) // this also redirected to logger only as info because of our setting in main.go
 
@@ -99,7 +105,7 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// log.Printf("delete : %v", err)
 
-		lh.logger.Error("delete failed", "listing_id", id, "err", err)
+		lh.logger.Error("delete failed", "listing_id", id, "requestId", requestId, "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError) // return 500 internal server error as response
 		return
 	}

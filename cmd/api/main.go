@@ -13,6 +13,7 @@ import (
 	"github.com/YashwanthN24/sell_point/internal/config"
 	"github.com/YashwanthN24/sell_point/internal/db"
 	"github.com/YashwanthN24/sell_point/internal/handlers"
+	"github.com/YashwanthN24/sell_point/internal/middlewares"
 )
 
 func main() {
@@ -26,29 +27,31 @@ func main() {
 		log.Fatalf("main.db.connect : %v", err)
 	}
 
-	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource: true , // log even the file and speific exact line where this log is from 
-		Level: slog.LevelInfo, // set global handler so global olog levell is Info (so info , warn and debug logs are logged rest al ignore i.e debug logs avoided )
+	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,           // log even the file and speific exact line where this log is from
+		Level:     slog.LevelInfo, // set global handler so global olog levell is Info (so info , warn and debug logs are logged rest al ignore i.e debug logs avoided )
 	})
-	logger := slog.New(handler)
-	slog.SetDefault(logger) // first this sets slog default handler as JsonLogger and this make sure that default log even log will be redirected to slog json style logger 
+	logger := slog.New(logHandler)
+	slog.SetDefault(logger) // first this sets slog default handler as JsonLogger and this make sure that default log even log will be redirected to slog json style logger
 	fmt.Println("database connected")
 	fmt.Println("starting olx server...")
 
 	mux := http.NewServeMux()
 
 	// refactor handlers depednednyc injection via constructor pattern using a common struct that includes all the dependency  of that handler
-	lh := handlers.NewListingHandler(db , logger)
+	lh := handlers.NewListingHandler(db, logger)
 
 	mux.HandleFunc("GET /healthz", handlers.Health)
 	mux.HandleFunc("GET /listings", lh.List)
 
 	mux.HandleFunc("DELETE /listings/{id}", lh.Delete)
 
+	// so all routes go through this middleware before going to the actual route handler
+	handler := middlewares.RequestId(mux)
 	// creating a server with configuration
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
-		Handler:      mux,
+		Handler:      handler,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 30,
 		IdleTimeout:  time.Second * 60,
