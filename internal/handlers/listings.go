@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/YashwanthN24/sell_point/internal/dtos"
 	"github.com/YashwanthN24/sell_point/internal/httpx"
 	"github.com/YashwanthN24/sell_point/internal/middlewares"
 )
@@ -123,8 +124,10 @@ func (lh ListingHander) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestId := middlewares.RequestIDFromContext(ctx)
 
-	var req listing
+	var req dtos.CreateListingRequest
 	// Decoder to convert json to struct (desrializsation)
+
+	// so now we are deserializing the payload (json body) into createListingRequest struct
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		lh.logger.Error("failed to decode", "requestId", requestId, "err", err)
 		httpx.Error(w, http.StatusBadRequest, "invalid_body", httpx.CodeMalformedJSON)
@@ -132,22 +135,22 @@ func (lh ListingHander) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fmt.Println(req)
-	// log.Println(req)
+	log.Println(req)
 
 	row := lh.db.QueryRowContext(ctx, `
 		INSERT INTO listings (title , description , price , city) 
-		VALUES ($1 , $2 , $3 , $4) RETURNING id`, req.Title, req.Description, req.Price, req.City)
+		VALUES ($1 , $2 , $3 , $4) RETURNING id , title , created_at  `, req.Title, req.Description, req.Price, req.City)
 
-	var id string
+	var out dtos.CreateListingResponse // because if we used listing struct then since all fields are not set we get zero values so elicitly use dto for both request snd response
 
 	// to return all field modify to RETURNING * for all fields and take a varibale of type liting struct and pass their pointers to Scan
-	if err := row.Scan(&id); err != nil {
+	if err := row.Scan(&out.ID, &out.Title, &out.CreatedAt); err != nil {
 		lh.logger.Error("failed to insert", "requestId", requestId, "err", err)
 		httpx.Error(w, http.StatusInternalServerError, "something went wrong", httpx.CodeInternalError)
 		return
 	}
 
-	lh.logger.Info("listing created", "request_id", requestId, "listing_id", id)
+	lh.logger.Info("listing created", "request_id", requestId, "listing_id", out.ID)
 
 	// w.Write([]byte("created"))
 
@@ -161,7 +164,7 @@ func (lh ListingHander) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
-	_ = json.NewEncoder(w).Encode(map[string]string{"id": id})
+	_ = json.NewEncoder(w).Encode(out)
 }
 
 // https://chatgpt.com/c/6aef09fd-3a54-83ec-9112-5de682109dd4
