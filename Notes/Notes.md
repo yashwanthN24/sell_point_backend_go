@@ -191,3 +191,9 @@ prints current log level and all other level above it (if we set logginglevel to
 loglevel if set to debug then all log messages will be printed, including debug messages. 
 
 This level system works the same across all backends (numbers might change but he same idea)
+
+## Implement Structured Logging 
+
+![alt text](image-22.png)
+
+![alt text](image-23.png)

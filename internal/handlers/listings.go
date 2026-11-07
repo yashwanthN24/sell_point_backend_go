@@ -24,12 +24,14 @@ type listing struct {
 // constructor pattern to handle multiple dependencies for this handler at one place via struct and constructor oattern
 
 type ListingHander struct {
-	db *sql.DB
+	db     *sql.DB
+	logger *slog.Logger
 }
 
-func NewListingHandler(db *sql.DB) *ListingHander {
+func NewListingHandler(db *sql.DB, logger *slog.Logger) *ListingHander {
 	return &ListingHander{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
@@ -44,7 +46,8 @@ func (lh ListingHander) List(w http.ResponseWriter, r *http.Request) {
 		`)
 
 	if err != nil {
-		log.Printf("query: %v", err)
+		lh.logger.Error("listings query error", "err", err)
+		// log.Printf("query: %v", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -56,10 +59,13 @@ func (lh ListingHander) List(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var l listing
 		if err := rows.Scan(&l.ID, &l.Title, &l.Description, &l.Price, &l.CreatedAt); err != nil {
-			log.Printf("rows.scan : %v", err)
+				lh.logger.Error("rows scan error", "err", err)
+			// log.Printf("rows.scan : %v", err)
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
+
+		lh.logger.Info("listings fetched" , "total" , len(listings))
 
 		listings = append(listings, l)
 	}
@@ -82,7 +88,7 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 	// request bound context always pass this forthrid part api and db calls as they avoid zombie queries i.e when client exits befoire the db finshes
 	ctx := r.Context()
 	id := r.PathValue("id")
-	log.Println("id", id)
+	log.Println("id", id) // this also redirected to logger only as info because of our setting in main.go
 
 	// db.Query() is only queries like select
 
@@ -93,8 +99,7 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// log.Printf("delete : %v", err)
 
-		// using global logger setup across app bad practice always we must be clear in which hander needs what dependency like how we do for db  so thats //TODO
-		slog.Error("delete failed", "listing_id", id, "err", err)
+		lh.logger.Error("delete failed", "listing_id", id, "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError) // return 500 internal server error as response
 		return
 	}

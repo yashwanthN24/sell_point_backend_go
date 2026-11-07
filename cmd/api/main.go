@@ -38,7 +38,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	// refactor handlers depednednyc injection via constructor pattern using a common struct that includes all the dependency  of that handler
-	lh := handlers.NewListingHandler(db)
+	lh := handlers.NewListingHandler(db , logger)
 
 	mux.HandleFunc("GET /healthz", handlers.Health)
 	mux.HandleFunc("GET /listings", lh.List)
