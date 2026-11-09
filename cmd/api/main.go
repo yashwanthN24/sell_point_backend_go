@@ -40,6 +40,7 @@ func main() {
 
 	// refactor handlers depednednyc injection via constructor pattern using a common struct that includes all the dependency  of that handler
 	lh := handlers.NewListingHandler(db, logger)
+	ah := handlers.NewAuthHandler(db, logger)
 
 	mux.HandleFunc("GET /healthz", handlers.Health)
 	mux.HandleFunc("GET /listings", lh.List)
@@ -47,6 +48,8 @@ func main() {
 	mux.HandleFunc("DELETE /listings/{id}", lh.Delete)
 
 	mux.HandleFunc("POST /listings", lh.Create)
+
+	mux.HandleFunc("POST /signup", ah.Signup)
 
 	// so all routes go through this middleware before going to the actual route handler
 	handler := middlewares.RequestId(mux)

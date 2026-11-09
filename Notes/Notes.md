@@ -117,8 +117,7 @@ func main() {
 
 ```
 
-
-Still one program m.Down() will undo all migrations up to the first migration so everything is gone 
+Still one program m.Down() will undo all migrations up to the first migration so everything is gone
 
 In production we wont want this behviour we would only want to rollback to last migration so we can use m.Steps(-1) to rollback only one migration at a time
 
@@ -130,27 +129,25 @@ on calling rows.next() it will return true if there is a next row to read and mo
 
 so by calling next on a row we iterate through each row of the query result set and read the data from each row one at a time
 
-
 ## Fetching Database Records & Returning the JSON
 
 Build the listings API endpoint from the previous episode into a fully working, database-backed endpoint. You’ll learn how to query, iterate through query results, scan rows into Go structs, handle database errors safely, and return the final data as properly formatted JSON to the client.
 
+Fetching database data isn't just about running a query.
+A production-ready handler needs to manage the full flow:
 
-Fetching database data isn't just about running a query. 
-A production-ready handler needs to manage the full flow: 
-
-query → iterate → scan → handle errors 
-→ release resources → encode → return JSON. 
+query → iterate → scan → handle errors
+→ release resources → encode → return JSON.
 
 ## Deleting Records & Managing Dependencies
-Build the delete listing endpoint and learn how to safely remove a record from the database using a dynamic route parameter and a parameterized SQL query. Then refactor the handlers using Go’s constructor pattern so that dependencies, such as the database, can be injected once and shared across multiple handlers without repeatedly passing them around. 
+
+Build the delete listing endpoint and learn how to safely remove a record from the database using a dynamic route parameter and a parameterized SQL query. Then refactor the handlers using Go’s constructor pattern so that dependencies, such as the database, can be injected once and shared across multiple handlers without repeatedly passing them around.
 
 to get path variables use r.PathValue("pathname")
 
 Ex: r.PathValue("id") (to get the id from the path variable)
 
-
-## use context to prevent zombie queries 
+## use context to prevent zombie queries
 
 ![alt text](image-17.png)
 
@@ -158,27 +155,24 @@ say db query takes 10s and client disconnects after 5s then the query will still
 
 So we have to signal the query to stop executing when the client disconnects so we can use context for that
 
-## Structured Logging 
+## Structured Logging
 
 Structured Logging in Go
 Learn how to replace basic text-based logging with structured JSON logging for production Go applications. You’ll use Go’s built-in  log/slog  package, configure a JSON handler, add useful fields such as listing IDs and errors, enable source information, and understand how logging levels control which records are written.
 What You’ll Learn
-Understand why structured logging matters in production. 
+Understand why structured logging matters in production.
 
-Use Go’s built-in  log/slog  package for structured JSON logging. 
+Use Go’s built-in  log/slog  package for structured JSON logging.
 
-Configure JSON handlers and add useful log attributes. 
+Configure JSON handlers and add useful log attributes.
 
-Understand  slog  logging levels: Debug, Info, Warn, and Error. 
+Understand  slog  logging levels: Debug, Info, Warn, and Error.
 
-Configure source information and the default logger. 
+Configure source information and the default logger.
 
 Know when to use different logging levels in production.
 
-
-
 ![alt text](image-18.png)
-
 
 ![alt text](image-19.png)
 
@@ -188,16 +182,38 @@ prints current log level and all other level above it (if we set logginglevel to
 
 ![alt text](image-21.png)
 
-loglevel if set to debug then all log messages will be printed, including debug messages. 
+loglevel if set to debug then all log messages will be printed, including debug messages.
 
 This level system works the same across all backends (numbers might change but he same idea)
 
-## Implement Structured Logging 
+## Implement Structured Logging
 
 ![alt text](image-22.png)
 
 ![alt text](image-23.png)
 
-uuid go package to generate Ids 
+uuid go package to generate Ids
 
 https://github.com/google/uuid
+
+## For POSt patch put
+
+use DTO for reqbody validaion and even for respnse use dtos
+
+migrate cli install
+
+scoop install migrate
+
+then to create migration file use
+
+migrate create -ext sql -dir migrations -seq create_user_table
+
+(This will create two files in migrations folder one for up and one for down migration)
+
+go x repositorys for additional utiliyt packages (https://go.dev/wiki/X-Repositories (extension packages that are not available in standard library))
+
+For password hasing bcrypt (https://pkg.go.dev/golang.org/x/crypto)
+
+or can use Standard library (crypto sha256 only https://pkg.go.dev/crypto/sha256@go1.27.3#New )
+
+go get -u golang.org/x/crypto
