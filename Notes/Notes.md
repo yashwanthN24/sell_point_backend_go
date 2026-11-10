@@ -217,3 +217,12 @@ For password hasing bcrypt (https://pkg.go.dev/golang.org/x/crypto)
 or can use Standard library (crypto sha256 only https://pkg.go.dev/crypto/sha256@go1.27.3#New )
 
 go get -u golang.org/x/crypto
+
+for jwt use this package 
+
+https://github.com/golang-jwt/jwt
+
+https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-NewWithClaims-Hmac
+
+https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-NewWithClaims-RegisteredClaims
+

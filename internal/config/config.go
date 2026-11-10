@@ -10,6 +10,7 @@ type Config struct {
 	Port        string
 	Env         string
 	DatabaseUrl string
+	JwtKey      string
 }
 
 func MustLoad() Config {
@@ -31,9 +32,16 @@ func MustLoad() Config {
 		panic("Database Url is required")
 	}
 
+	JwtKey := os.Getenv("JWT_KEY")
+
+	if JwtKey == "" {
+		panic("JwtKey is required")
+	}
+
 	return Config{
 		Port:        port,
 		Env:         env,
 		DatabaseUrl: dbUrl,
+		JwtKey:      JwtKey,
 	}
 }
