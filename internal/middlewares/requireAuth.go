@@ -73,7 +73,6 @@ func RequireAuth(logger *slog.Logger, secret string) func(next http.Handler) htt
 
 			fmt.Println(claims)
 
-			
 			userID, err := uuid.Parse(claims.Subject)
 
 			if err != nil {
@@ -92,7 +91,7 @@ func RequireAuth(logger *slog.Logger, secret string) func(next http.Handler) htt
 	}
 }
 
-func UserIDFromContext(ctx context.Context) uuid.UUID {
-	userId, _ := ctx.Value(userIDKey).(uuid.UUID) // this (uuid.UUID) to typecast so if not possible it will throw panic error which you can handle
-	return userId
+func UserIDFromContext(ctx context.Context) (uuid.UUID, bool) {
+	userId, ok := ctx.Value(userIDKey).(uuid.UUID) // this (uuid.UUID) to typecast so if not possible it will throw panic error which you can handle
+	return userId, ok
 }

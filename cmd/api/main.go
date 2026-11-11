@@ -49,18 +49,19 @@ func main() {
 	// now only delete route requires authentatiocation rest all are public apis
 	mux.Handle("DELETE /listings/{id}", requireAuth(http.HandlerFunc(lh.Delete)))
 
-	mux.HandleFunc("POST /listings", lh.Create)
+	// create endpoint also must be authentciated
+	mux.Handle("POST /listings", requireAuth(http.HandlerFunc(lh.Create)))
 
 	mux.HandleFunc("POST /signup", ah.Signup)
 
 	mux.HandleFunc("POST /signin", ah.Signin)
 
-	mux.HandleFunc("GET /test" , func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type" , "application/json")
+	mux.HandleFunc("GET /test", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
 		w.Write([]byte(`{"message": "ok"}`))
-	})// but always use a encoder best this doesnt validate hepassed json so it can be malformed json as well
+	}) // but always use a encoder best this doesnt validate hepassed json so it can be malformed json as well
 
 	// handler := middlewares.RequestId(requireAuth(mux)) // thisprotectest all routes but we need signin and signup to be public
 

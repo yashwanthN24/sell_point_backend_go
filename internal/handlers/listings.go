@@ -98,7 +98,13 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// get the current;y logged in user's id (uuid) from jt midleware va context
 
-	userId := middlewares.UserIDFromContext(ctx)
+	userId, ok := middlewares.UserIDFromContext(ctx)
+
+	if !ok {
+		lh.logger.Error("no userid found in context", "request_id", requestId)
+		httpx.Error(w, http.StatusInternalServerError, "something went wrong", httpx.CodeInternalError)
+		return
+	}
 
 	// requestid := ctx.Value("requestCtxId").(string)
 	id := r.PathValue("id")
@@ -131,6 +137,14 @@ func (lh ListingHander) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestId := middlewares.RequestIDFromContext(ctx)
 
+	userId, ok := middlewares.UserIDFromContext(ctx)
+
+	if !ok {
+		lh.logger.Error("no userid found in context", "request_id", requestId)
+		httpx.Error(w, http.StatusInternalServerError, "something went wrong", httpx.CodeInternalError)
+		return
+	}
+
 	var req dtos.CreateListingRequest
 	// Decoder to convert json to struct (desrializsation)
 
@@ -153,8 +167,8 @@ func (lh ListingHander) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	row := lh.db.QueryRowContext(ctx, `
-		INSERT INTO listings (title , description , price , city) 
-		VALUES ($1 , $2 , $3 , $4) RETURNING id , title , created_at  `, req.Title, req.Description, req.Price, req.City)
+		INSERT INTO listings (user_id , title , description , price , city) 
+		VALUES ($1 , $2 , $3 , $4 , $5) RETURNING id , title , created_at  `, userId, req.Title, req.Description, req.Price, req.City)
 
 	var out dtos.CreateListingResponse // because if we used listing struct then since all fields are not set we get zero values so elicitly use dto for both request snd response
 
