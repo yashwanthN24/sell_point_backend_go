@@ -9,11 +9,8 @@ import (
 
 // middleware is a function that takes in a handler and returns a handler
 
-type ctxKey int
 
-const (
-	requestIDKey ctxKey = iota
-)
+
 
 const (
 	requestId = "X-Request-ID"

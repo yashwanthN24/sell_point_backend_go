@@ -40,18 +40,29 @@ func main() {
 
 	// refactor handlers depednednyc injection via constructor pattern using a common struct that includes all the dependency  of that handler
 	lh := handlers.NewListingHandler(db, logger)
-	ah := handlers.NewAuthHandler(db, logger , cfg)
+	ah := handlers.NewAuthHandler(db, logger, cfg)
+	requireAuth := middlewares.RequireAuth(logger, cfg.JwtKey)
 
 	mux.HandleFunc("GET /healthz", handlers.Health)
 	mux.HandleFunc("GET /listings", lh.List)
 
-	mux.HandleFunc("DELETE /listings/{id}", lh.Delete)
+	// now only delete route requires authentatiocation rest all are public apis
+	mux.Handle("DELETE /listings/{id}", requireAuth(http.HandlerFunc(lh.Delete)))
 
 	mux.HandleFunc("POST /listings", lh.Create)
 
 	mux.HandleFunc("POST /signup", ah.Signup)
 
-	mux.HandleFunc("POST /signin" , ah.Signin)
+	mux.HandleFunc("POST /signin", ah.Signin)
+
+	mux.HandleFunc("GET /test" , func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type" , "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		w.Write([]byte(`{"message": "ok"}`))
+	})// but always use a encoder best this doesnt validate hepassed json so it can be malformed json as well
+
+	// handler := middlewares.RequestId(requireAuth(mux)) // thisprotectest all routes but we need signin and signup to be public
 
 	// so all routes go through this middleware before going to the actual route handler
 	handler := middlewares.RequestId(mux)
