@@ -95,6 +95,11 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 	// request bound context always pass this forthrid part api and db calls as they avoid zombie queries i.e when client exits befoire the db finshes
 	ctx := r.Context()
 	requestId := middlewares.RequestIDFromContext(ctx)
+
+	// get the current;y logged in user's id (uuid) from jt midleware va context
+
+	userId := middlewares.UserIDFromContext(ctx)
+
 	// requestid := ctx.Value("requestCtxId").(string)
 	id := r.PathValue("id")
 	log.Println("id", id) // this also redirected to logger only as info because of our setting in main.go
@@ -102,8 +107,9 @@ func (lh ListingHander) Delete(w http.ResponseWriter, r *http.Request) {
 	// db.Query() is only queries like select
 
 	// for delete queries we use db.Exec()
+	//* here currently any logged in user can delete other users listings if he gets id of it so we need to be strict
 	_, err := lh.db.ExecContext(ctx,
-		`DELETE FROM listings WHERE id = $1`, id)
+		`DELETE FROM listings WHERE id = $1 AND user_id = $2`, id, userId)
 
 	if err != nil {
 		// log.Printf("delete : %v", err)

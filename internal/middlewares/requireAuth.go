@@ -10,6 +10,7 @@ import (
 
 	"github.com/YashwanthN24/sell_point/internal/httpx"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 // middleware is a function that takes in a handler and returns a handler
@@ -72,12 +73,26 @@ func RequireAuth(logger *slog.Logger, secret string) func(next http.Handler) htt
 
 			fmt.Println(claims)
 
-			// TODO : Subject is userid (currently string but need to parse it to uuid before sending to the next handler)
-			ctxWithUserId := context.WithValue(ctx, userIDKey, claims.Subject)
+			
+			userID, err := uuid.Parse(claims.Subject)
+
+			if err != nil {
+				log.Error("invalid user ID in token", "err", err)
+				httpx.Error(w, http.StatusUnauthorized, "invalid user ID", httpx.CodeUnauthenticated)
+				return
+			}
+
+			log.Info("user loggedin ", "userid", userID)
+			ctxWithUserId := context.WithValue(ctx, userIDKey, userID)
 
 			// call the next handler
 			next.ServeHTTP(w, r.WithContext(ctxWithUserId))
 
 		})
 	}
+}
+
+func UserIDFromContext(ctx context.Context) uuid.UUID {
+	userId, _ := ctx.Value(userIDKey).(uuid.UUID) // this (uuid.UUID) to typecast so if not possible it will throw panic error which you can handle
+	return userId
 }

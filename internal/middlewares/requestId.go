@@ -36,6 +36,6 @@ func RequestId(next http.Handler) http.Handler {
 }
 
 func RequestIDFromContext(ctx context.Context) string {
-	requestId := ctx.Value(requestIDKey).(string)
+	requestId , _ := ctx.Value(requestIDKey).(string) // if typecast to string fails then you can use the seoncd value and check if err and hanlde
 	return requestId
 }
