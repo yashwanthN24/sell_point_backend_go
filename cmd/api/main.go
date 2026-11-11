@@ -41,6 +41,7 @@ func main() {
 	// refactor handlers depednednyc injection via constructor pattern using a common struct that includes all the dependency  of that handler
 	lh := handlers.NewListingHandler(db, logger)
 	ah := handlers.NewAuthHandler(db, logger, cfg)
+	mehandler := handlers.NewMeHandler(db, logger)
 	requireAuth := middlewares.RequireAuth(logger, cfg.JwtKey)
 
 	mux.HandleFunc("GET /healthz", handlers.Health)
@@ -55,6 +56,8 @@ func main() {
 	mux.HandleFunc("POST /signup", ah.Signup)
 
 	mux.HandleFunc("POST /signin", ah.Signin)
+
+	mux.Handle("GET /me", requireAuth(http.HandlerFunc(mehandler.List)))
 
 	mux.HandleFunc("GET /test", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
