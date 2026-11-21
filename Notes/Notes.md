@@ -218,7 +218,7 @@ or can use Standard library (crypto sha256 only https://pkg.go.dev/crypto/sha256
 
 go get -u golang.org/x/crypto
 
-for jwt use this package 
+for jwt use this package
 
 https://github.com/golang-jwt/jwt
 
@@ -226,3 +226,30 @@ https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-NewWithClaims-Hmac
 
 https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-NewWithClaims-RegisteredClaims
 
+## Handling Images upload in Production backend
+
+![alt text](image-24.png)
+
+go mod download (to explicity update/install all dependencies modules required for this project )
+
+go run / go build already includes it but we can include this explicityly to utilize layer caching of docker images
+
+https://pkg.go.dev/log/slog
+
+
+Object storage buckets are flat key-value stores rather than traditional filesystems, so a key like upload/image.jpg acts as the unique identifier used to upload, locate, and retrieve the file within a bucket.
+
+Why Keys Are Needed
+
+• Unique lookup: An object has file bytes, metadata, and a key. You fetch or replace the image by its key instead of navigating real disk folders.
+• Logical grouping: Slashes (/) in a key like upload/image.jpg act as a prefix to organize names cleanly, even though they do not create true filesystem directories.
+• Database decoupling: Apps usually store the key or URL in a database alongside user or product records while keeping heavy image bytes in object storage.
+• Safe updates and caching: Changing the key (such as v1 to v2) when updating an image helps avoid serving stale cached versions from a CDN.
+
+Practical Tip for upload/image.jpg
+
+Raw filenames like image.jpg often collide when different users upload files with the same name. In production, developers usually include a unique ID, user/record ID, or content hash (for example, uploads/user-42/9f8a1c.jpg) to prevent overwrites
+
+So we store the key in the listing table in the database and when we want to fetch the image we can use that key to fetch the image from the object storage bucket
+
+https://developers.cloudflare.com/r2/
