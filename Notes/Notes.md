@@ -234,8 +234,17 @@ go mod download (to explicity update/install all dependencies modules required f
 
 go run / go build already includes it but we can include this explicityly to utilize layer caching of docker images
 
-https://pkg.go.dev/log/slog
+go doc (shows the documentation of the package in terminal)
 
+go doc net/http (shows the documentation of the package net/http in terminal)
+
+go doc -all net/http (shows the documentation of the package net/http in terminal with all its functions and methods)
+
+and // comments before a struct or variable or function are considered as documentation comments and are shown in the go doc output
+
+/\* \*/ also valid comment but for documentation prefer // as its go's standard way
+
+https://pkg.go.dev/log/slog
 
 Object storage buckets are flat key-value stores rather than traditional filesystems, so a key like upload/image.jpg acts as the unique identifier used to upload, locate, and retrieve the file within a bucket.
 
@@ -253,3 +262,18 @@ Raw filenames like image.jpg often collide when different users upload files wit
 So we store the key in the listing table in the database and when we want to fetch the image we can use that key to fetch the image from the object storage bucket
 
 https://developers.cloudflare.com/r2/
+
+So we have client which interacts with R2 or s3 and PresignedClient which is used to generate presigned urls for uploading and downloading files from the object storage bucket
+
+https://developers.cloudflare.com/r2/examples/aws/aws-sdk-go/
+
+go mod tidy (will install all dependencie you manually added in your code package so it wont gurantee the latest version as go mod tidy is not updated always)
+
+so use 
+
+go get packagename@latest
+
+or 
+
+go get -u packagename (to update the package to latest version)
+

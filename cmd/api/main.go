@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"log/slog"
@@ -14,6 +15,7 @@ import (
 	"github.com/YashwanthN24/sell_point/internal/db"
 	"github.com/YashwanthN24/sell_point/internal/handlers"
 	"github.com/YashwanthN24/sell_point/internal/middlewares"
+	"github.com/YashwanthN24/sell_point/internal/storage"
 )
 
 func main() {
@@ -25,6 +27,17 @@ func main() {
 
 	if err != nil {
 		log.Fatalf("main.db.connect : %v", err)
+	}
+
+	storeClient, err := storage.NewR2(context.TODO(), storage.R2Config{
+		AccountID:    cfg.StorageAccountID,
+		AccessKey:    cfg.StorageAccessKey,
+		AccessSecret: cfg.StorageAccessSecret,
+		Bucket:       cfg.StorageBucket,
+	})
+
+	if err != nil {
+		log.Fatalf("main.storage.r2: %v", err)
 	}
 
 	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
@@ -42,6 +55,7 @@ func main() {
 	lh := handlers.NewListingHandler(db, logger)
 	ah := handlers.NewAuthHandler(db, logger, cfg)
 	mehandler := handlers.NewMeHandler(db, logger)
+	uh := handlers.NewUploadsHandler(logger, storeClient)
 	requireAuth := middlewares.RequireAuth(logger, cfg.JwtKey)
 
 	mux.HandleFunc("GET /healthz", handlers.Health)
@@ -58,6 +72,8 @@ func main() {
 	mux.HandleFunc("POST /signin", ah.Signin)
 
 	mux.Handle("GET /me", requireAuth(http.HandlerFunc(mehandler.List)))
+
+	mux.Handle("POST /uploads/presign", requireAuth(http.HandlerFunc(uh.Presign)))
 
 	mux.HandleFunc("GET /test", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
