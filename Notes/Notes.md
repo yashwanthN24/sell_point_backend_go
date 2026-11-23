@@ -269,11 +269,14 @@ https://developers.cloudflare.com/r2/examples/aws/aws-sdk-go/
 
 go mod tidy (will install all dependencie you manually added in your code package so it wont gurantee the latest version as go mod tidy is not updated always)
 
-so use 
+so use
 
 go get packagename@latest
 
-or 
+or
 
 go get -u packagename (to update the package to latest version)
 
+## A New Go API For JSON update to Marshal and Unmarshal
+
+https://go.dev/blog/jsonv2
